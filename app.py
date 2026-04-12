@@ -159,8 +159,8 @@ with col_report:
         with rep_col2:
             st.markdown(f"## {display_name}")
             if st.button("📢 CONFIRM: HERE WE GO!"):
-    with st.spinner("Analyzing Market DNA..."):
-        # Ensure feature alignment
+         with st.spinner("Analyzing Market DNA..."):
+        # Ensure the rest of your logic is also indented here
         if selected_player != "Search Player...":
             full_row = df[df["player"] == selected_player].iloc[0].copy()
         else:
