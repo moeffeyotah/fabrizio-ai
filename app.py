@@ -159,48 +159,44 @@ with col_report:
         with rep_col2:
             st.markdown(f"## {display_name}")
             if st.button("📢 CONFIRM: HERE WE GO!"):
-         with st.spinner("Analyzing Market DNA..."):
-        # Ensure the rest of your logic is also indented here
-        if selected_player != "Search Player...":
-            full_row = df[df["player"] == selected_player].iloc[0].copy()
-        else:
-            full_row = df.quantile(0.25, numeric_only=True).copy()
-            full_row["age"] = 18
+                with st.spinner("Analyzing Market DNA..."):
+                    if selected_player != "Search Player...":
+                        full_row = df[df["player"] == selected_player].iloc[0].copy()
+                    else:
+                        full_row = df.quantile(0.25, numeric_only=True).copy()
+                        full_row["age"] = 18
 
-        # Inject slider values
-        full_row["acceleration"], full_row["sprint_speed"] = s1, s1
-        full_row["finishing"], full_row["shot_power"] = s2, s2
-        full_row["short_pass"], full_row["vision"] = s3, s3
-        full_row["dribbling"], full_row["ball_control"] = s4, s4
-        full_row["stand_tackle"], full_row["interceptions"] = s5, s5
-        full_row["strength"], full_row["stamina"] = s6, s6
+                    # Attribute Injection
+                    full_row["acceleration"], full_row["sprint_speed"] = s1, s1
+                    full_row["finishing"], full_row["shot_power"] = s2, s2
+                    full_row["short_pass"], full_row["vision"] = s3, s3
+                    full_row["dribbling"], full_row["ball_control"] = s4, s4
+                    full_row["stand_tackle"], full_row["interceptions"] = s5, s5
+                    full_row["strength"], full_row["stamina"] = s6, s6
 
-        # Prepare for model
-        feat = full_row.drop(["player", "value", "country", "club"], errors="ignore")
-        input_raw = pd.to_numeric(feat, errors="coerce").fillna(0).values.reshape(1, -1)
-        scaled_input = scaler.transform(input_raw)
+                    # Prepare for model
+                    feat = full_row.drop(["player", "value", "country", "club"], errors="ignore")
+                    input_raw = pd.to_numeric(feat, errors="coerce").fillna(0).values.reshape(1, -1)
+                    scaled_input = scaler.transform(input_raw)
 
-        # PREDICTION FIX: Handling standard single-output models
-        predictions = model.predict(scaled_input)
-        
-        # If your model has 2 outputs (Value, Class), use this:
-        if isinstance(predictions, list):
-            val_pred = float(predictions[0][0])
-            prob = float(predictions[1][0][0])
-        else:
-            # If it's a single output (just value), we simulate probability based on value
-            val_pred = float(predictions[0][0])
-            prob = min(val_pred / 100, 1.0) # Example logic
+                    # Prediction Execution
+                    predictions = model.predict(scaled_input)
+                    
+                    if isinstance(predictions, list):
+                        val_pred = float(predictions[0][0])
+                        prob = float(predictions[1][0][0])
+                    else:
+                        val_pred = float(predictions[0][0])
+                        prob = min(val_pred / 100, 1.0)
 
-        # --- DISPLAY RESULTS ---
-        st.markdown("---")
-        status = "ELITE TARGET 🌟" if prob > threshold else "STANDARD ASSET ⚽"
-        status_color = "#00FF87" if prob > threshold else "#FF3131"
+                    st.markdown("---")
+                    status = "ELITE TARGET 🌟" if prob > threshold else "STANDARD ASSET ⚽"
+                    status_color = "#00FF87" if prob > threshold else "#FF3131"
 
-        st.markdown(f"<h3 style='color:{status_color}; text-align: center;'>{status}</h3>", unsafe_allow_html=True)
-        st.metric("ESTIMATED MARKET VALUE", f"${val_pred:.1f}M")
-        st.progress(prob)
-        st.write(f"Scout Confidence: {prob*100:.1f}%")
+                    st.markdown(f"<h3 style='color:{status_color}; text-align: center;'>{status}</h3>", unsafe_allow_html=True)
+                    st.metric("ESTIMATED MARKET VALUE", f"${val_pred:.1f}M")
+                    st.progress(prob)
+                    st.write(f"Scout Confidence: {prob*100:.1f}%")
 
 # --- FOOTER ---
 st.markdown("<br>", unsafe_allow_html=True)
@@ -208,3 +204,5 @@ f1, f2, f3 = st.columns(3)
 f1.button("📑 DOSSIER")
 f2.button("🔄 COMPARE")
 f3.button("🗞️ FEED")
+
+      
