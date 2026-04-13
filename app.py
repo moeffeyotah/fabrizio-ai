@@ -113,7 +113,7 @@ else:
 col_dna, col_report = st.columns([1, 1.2], gap="large")
 
 with col_dna:
-    st.markdown("### 🧬 <span style='color:#FFD700;'>PLAYER DNA</span>", unsafe_allow_html=True)
+    st.markdown("### 🧬 <span style='color:#FFD700;'>PLAYER STATS</span>", unsafe_allow_html=True)
     s1 = st.slider("PACE", 0, 100, int(init_vals[0]))
     s2 = st.slider("SHOOTING", 0, 100, int(init_vals[1]))
     s3 = st.slider("PASSING", 0, 100, int(init_vals[2]))
