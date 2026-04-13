@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 
 # 1. Page Configuration
 st.set_page_config(
-    page_title="FABRIZIO AI | Lab", 
+    page_title="FABRIZIO AI 3.3.3", 
     layout="wide", 
     initial_sidebar_state="collapsed"
 )
@@ -167,7 +167,8 @@ with col_report:
 
                 feat = full_row.drop(["player", "value", "country_code", "club_code"], errors="ignore")
                 input_raw = pd.to_numeric(feat, errors="coerce").fillna(0).values.reshape(1, -1)
-
+                st.write(f"Scaler expects {scaler.n_features_in_} features.")
+                st.write(f"You provided {input_raw.shape[1]} features.")
                 val_pred, cls_pred = model.predict(scaler.transform(input_raw))
                 prob = float(cls_pred[0][0])
 
