@@ -5,3 +5,4 @@ tensorflow
 joblib
 plotly
 google-generativeai
+scikit-learn==1.8.0
