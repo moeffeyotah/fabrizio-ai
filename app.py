@@ -12,18 +12,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. Fabrizio Brand Styling 
+# 2. Fabrizio Brand Styling (Obsidian + Emerald + Gold)
 st.markdown(
     """
     <style>
-    /* Main Background and Text */
     .stApp { background-color: #0B0B0B; color: #E0E0E0; font-family: 'Inter', sans-serif; }
-    
-    /* Branding Colors */
     .brand-fab { color: #00FF87; font-weight: 900; letter-spacing: 2px; }
     .brand-ai { color: #FFD700; font-weight: 300; }
     
-    /* Glassmorphism Containers */
     [data-testid="stVerticalBlock"] > div:has(div.element-container) {
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(15px);
@@ -32,7 +28,6 @@ st.markdown(
         padding: 25px;
     }
     
-    /* The "Here We Go" Button */
     .stButton>button {
         background-color: #00FF87 !important;
         color: #0B0B0B !important; 
@@ -47,7 +42,6 @@ st.markdown(
         transform: scale(1.02);
     }
     
-    /* Slider Color Theme */
     div[data-baseweb="slider"] > div > div { background-color: #FFD700 !important; }
     
     header {visibility: hidden;}
@@ -57,9 +51,15 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# 3. Smart LLM Logic
+def get_llm_analysis(name, val, prob, status):
+    if prob > 0.85:
+        return f"🚨 HERE WE GO! {name} has been flagged as a Generational Talent. Neural architecture confirms elite technical DNA. Valuation of ${val:.2f}M reflects high market scarcity."
+    else:
+        return f"Scout Note: {name} shows stable metrics but lacks 'Elite' variance. Ideal for tactical depth or high-potential development roles."
+
 @st.cache_resource
 def load_assets():
-    # Adding error handling for missing files
     try:
         custom_objects = {"mse": tf.keras.losses.MeanSquaredError()}
         model = tf.keras.models.load_model("champion_model.h5", custom_objects=custom_objects)
@@ -69,23 +69,18 @@ def load_assets():
         data = data.fillna(0)
         return model, scaler, data
     except Exception as e:
-        st.error(f"Asset Load Error: Ensure champion_model.h5, scaler.pkl, and player_stats.csv are in the directory.")
+        st.error(f"Asset Load Error: Ensure files are in the directory.")
         return None, None, None
 
 model, scaler, df = load_assets()
 
 # --- TOP NAVIGATION ---
-st.markdown(
-    "<h1 style='text-align: center; margin-bottom: 0;'><span class='brand-fab'>FABRIZIO</span> <span class='brand-ai'>AI</span></h1>",
-    unsafe_allow_html=True,
-)
-st.markdown("<p style='text-align: center; color: #666; font-size: 0.8em;'>PREDICTIVE SCOUTING ENGINE v3.0</p>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; margin-bottom: 0;'><span class='brand-fab'>FABRIZIO</span> <span class='brand-ai'>AI</span></h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #666; font-size: 0.8em;'>LLM-INTEGRATED NEURAL LAB v3.3.3</p>", unsafe_allow_html=True)
 
 _, search_col, _ = st.columns([1, 2, 1])
 with search_col:
-    selected_player = st.selectbox(
-        "SEARCH TRANSFER MARKET", ["Search Player..."] + list(df["player"].unique()), key="fab_search"
-    )
+    selected_player = st.selectbox("SEARCH TRANSFER MARKET", ["Search Player..."] + list(df["player"].unique()), key="fab_search")
 
 # --- DYNAMIC INITIALIZATION ---
 if selected_player != "Search Player...":
@@ -107,8 +102,7 @@ else:
 col_dna, col_report = st.columns([1, 1.2], gap="large")
 
 with col_dna:
-    st.markdown("### 🧬 <span style='color:#FFD700;'>PLAYER STATS</span>", unsafe_allow_html=True)
-
+    st.markdown("### 🧬 <span style='color:#FFD700;'>PLAYER DNA</span>", unsafe_allow_html=True)
     s1 = st.slider("PACE", 0, 100, int(init_vals[0]))
     s2 = st.slider("SHOOTING", 0, 100, int(init_vals[1]))
     s3 = st.slider("PASSING", 0, 100, int(init_vals[2]))
@@ -116,24 +110,14 @@ with col_dna:
     s5 = st.slider("DEFENDING", 0, 100, int(init_vals[4]))
     s6 = st.slider("PHYSICALITY", 0, 100, int(init_vals[5]))
 
-    fig = go.Figure(
-        go.Scatterpolar(
-            r=[s1, s2, s3, s4, s5, s6],
-            theta=["PACE", "SHOOTING", "PASSING", "DRIBBLING", "DEFENDING", "PHYSICALITY"],
-            fill="toself",
-            fillcolor="rgba(0, 255, 135, 0.15)",
-            line=dict(color="#00FF87", width=3),
-        )
-    )
+    fig = go.Figure(go.Scatterpolar(
+        r=[s1, s2, s3, s4, s5, s6],
+        theta=["PACE", "SHOOTING", "PASSING", "DRIBBLING", "DEFENDING", "PHYSICALITY"],
+        fill="toself", fillcolor="rgba(0, 255, 135, 0.15)", line=dict(color="#00FF87", width=3)
+    ))
     fig.update_layout(
-        polar=dict(
-            bgcolor="rgba(0,0,0,0)",
-            radialaxis=dict(visible=True, range=[0, 100], color="#555", gridcolor="#333"),
-            angularaxis=dict(color="#888", gridcolor="#333")
-        ),
-        showlegend=False,
-        paper_bgcolor="rgba(0,0,0,0)",
-        margin=dict(t=40, b=40, l=40, r=40),
+        polar=dict(bgcolor="rgba(0,0,0,0)", radialaxis=dict(visible=True, range=[0, 100], color="#555", gridcolor="#333")),
+        showlegend=False, paper_bgcolor="rgba(0,0,0,0)", margin=dict(t=40, b=40)
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -144,12 +128,9 @@ with col_report:
     with st.container():
         rep_col1, rep_col2 = st.columns([1, 1.5])
         with rep_col1:
-            # Using your yellow/red palette for the scout icon if possible
             st.image("https://cdn-icons-png.flaticon.com/512/2591/2591458.png", width=140)
-            st.markdown("<p style='text-align: center; color: #00FF87; font-size: 0.8em;'>LINK STABLE</p>", unsafe_allow_html=True)
-
         with rep_col2:
-            st.markdown(f"<h2 style='margin-bottom:0;'>{display_name}</h2>", unsafe_allow_html=True)
+            st.markdown(f"## {display_name}")
             if st.button("📢 HERE WE GO!"):
                 if selected_player != "Search Player...":
                     full_row = df[df["player"] == selected_player].iloc[0].copy()
@@ -157,31 +138,37 @@ with col_report:
                     full_row = df.quantile(0.25, numeric_only=True).copy()
                     full_row["age"] = 18
 
-                # Map sliders to model input
-                full_row["acceleration"], full_row["sprint_speed"] = s1, s1
-                full_row["finishing"], full_row["shot_power"] = s2, s2
-                full_row["short_pass"], full_row["vision"] = s3, s3
-                full_row["dribbling"], full_row["ball_control"] = s4, s4
-                full_row["stand_tackle"], full_row["interceptions"] = s5, s5
-                full_row["strength"], full_row["stamina"] = s6, s6
+                # Map DNA sliders
+                for idx, attr in enumerate([["acceleration", "sprint_speed"], ["finishing", "shot_power"], ["short_pass", "vision"], ["dribbling", "ball_control"], ["stand_tackle", "interceptions"], ["strength", "stamina"]]):
+                    for col_name in attr:
+                        if col_name in full_row: full_row[col_name] = [s1, s2, s3, s4, s5, s6][idx]
 
-                feat = full_row.drop(["player", "value", "country_code", "club_code"], errors="ignore")
+                # --- AUTO-ALIGN FEATURES ---
+                expected_features = scaler.feature_names_in_
+                for col in expected_features:
+                    if col not in full_row:
+                        full_row[col] = 0
+                
+                feat = full_row[expected_features]
                 input_raw = pd.to_numeric(feat, errors="coerce").fillna(0).values.reshape(1, -1)
-                st.write(f"Scaler expects {scaler.n_features_in_} features.")
-                st.write(f"You provided {input_raw.shape[1]} features.")
-                val_pred, cls_pred = model.predict(scaler.transform(input_raw))
-                prob = float(cls_pred[0][0])
 
+                # Scale and Predict
+                input_scaled = scaler.transform(input_raw)
+                val_pred, cls_pred = model.predict(input_scaled)
+                
+                prob = float(cls_pred[0][0])
                 st.markdown("---")
                 status = "ELITE TARGET 🌟" if prob > threshold else "PROSPECT ASSET ⚽"
                 status_color = "#00FF87" if prob > threshold else "#FFD700"
 
-                st.markdown(f"<h3 style='color:{status_color}; text-align: center;'>{status}</h3>", unsafe_allow_html=True)
-                
+                st.markdown(f"<h3 style='color:{status_color};'>{status}</h3>", unsafe_allow_html=True)
                 final_val = val_pred[0][0] if s1 > 20 else val_pred[0][0] * 0.1
-                st.metric("PREDICTED MARKET VALUE", f"${final_val:.2f}M")
+                st.metric("PREDICTED VALUE", f"${final_val:.2f}M")
                 
-                st.write(f"Neural Confidence: {prob*100:.1f}%")
+                with st.expander("🤖 LLM ANALYST REPORT", expanded=True):
+                    st.write(get_llm_analysis(display_name, final_val, prob, status))
+
+                st.write(f"Confidence: {prob*100:.1f}%")
                 st.progress(prob)
 
 # --- FOOTER BAR ---
