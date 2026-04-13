@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. LLM Setup (Using your provided Key)
+# 2. LLM Setup
 genai.configure(api_key="AIzaSyDWVxRdsnuBeVMGzdqkVRypVrcmX97nBWo")
 llm_model = genai.GenerativeModel('gemini-pro')
 
@@ -98,7 +98,14 @@ with search_col:
 if selected_player != "Search Player...":
     p_data = df[df["player"] == selected_player].iloc[0]
     display_name = selected_player.upper()
-    init_vals = [(p_data["sprint_speed"] + p_data["acceleration"]) / 2, (p_data["finishing"] + p_data["shot_power"]) / 2, (p_data["short_pass"] + p_data["vision"]) / 2, (p_data["dribbling"] + p_data["ball_control"]) / 2, (p_data["stand_tackle"] + p_data["interceptions"]) / 2, (p_data["strength"] + p_data["stamina"]) / 2]
+    init_vals = [
+        (p_data["sprint_speed"] + p_data["acceleration"]) / 2, 
+        (p_data["finishing"] + p_data["shot_power"]) / 2, 
+        (p_data["short_pass"] + p_data["vision"]) / 2, 
+        (p_data["dribbling"] + p_data["ball_control"]) / 2, 
+        (p_data["stand_tackle"] + p_data["interceptions"]) / 2, 
+        (p_data["strength"] + p_data["stamina"]) / 2
+    ]
 else:
     display_name = "MOSES EFFEYOTAH"
     init_vals = [45.0] * 6
@@ -120,7 +127,7 @@ with col_dna:
         fill="toself", fillcolor="rgba(255, 215, 0, 0.1)", line=dict(color="#FFD700", width=3)
     ))
     fig.update_layout(polar=dict(bgcolor="rgba(0,0,0,0)", radialaxis=dict(visible=True, range=[0, 100], color="#555")), showlegend=False, paper_bgcolor="rgba(0,0,0,0)")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 with col_report:
     st.markdown("### 📡 <span style='color:#FF3131;'>NEURAL VERDICT</span>", unsafe_allow_html=True)
@@ -134,18 +141,30 @@ with col_report:
             full_row["age"] = 18
 
         # Inject Slider Stats
-        for idx, attr in enumerate([["acceleration", "sprint_speed"], ["finishing", "shot_power"], ["short_pass", "vision"], ["dribbling", "ball_control"], ["stand_tackle", "interceptions"], ["strength", "stamina"]]):
-            for col_name in attr:
-                if col_name in full_row: full_row[col_name] = [s1, s2, s3, s4, s5, s6][idx]
+        slider_map = [s1, s2, s3, s4, s5, s6]
+        attr_groups = [
+            ["acceleration", "sprint_speed"], ["finishing", "shot_power"], 
+            ["short_pass", "vision"], ["dribbling", "ball_control"], 
+            ["stand_tackle", "interceptions"], ["strength", "stamina"]
+        ]
+        
+        for idx, attr_list in enumerate(attr_groups):
+            for col_name in attr_list:
+                if col_name in full_row: 
+                    full_row[col_name] = slider_map[idx]
 
         # Auto-Align features
         expected_features = scaler.feature_names_in_
         for col in expected_features:
-            if col not in full_row: full_row[col] = 0
+            if col not in full_row: 
+                full_row[col] = 0
         
         feat = full_row[expected_features]
         input_raw = pd.to_numeric(feat, errors="coerce").fillna(0).values.reshape(1, -1)
-        val_pred, cls_pred = model.predict(scaler.transform(input_raw))
+        
+        # Scale and Predict
+        input_scaled = scaler.transform(input_raw)
+        val_pred, cls_pred = model.predict(input_scaled)
         prob = float(cls_pred[0][0])
 
         st.markdown("---")
@@ -153,7 +172,7 @@ with col_report:
         status_color = "#00FF87" if prob > threshold else "#FFD700"
         final_val = val_pred[0][0] if s1 > 20 else val_pred[0][0] * 0.1
 
-        st.markdown(f"<h3 style='color:{status_color};'>{status}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='color:{status_color}; text-align: center;'>{status}</h3>", unsafe_allow_html=True)
         st.metric("PREDICTED VALUE", f"${final_val:.2f}M")
         
         with st.expander("🤖 SMART SCOUT ANALYSIS", expanded=True):
