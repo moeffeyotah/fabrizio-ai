@@ -5,45 +5,78 @@ import tensorflow as tf
 import joblib
 import plotly.graph_objects as go
 import google.generativeai as genai
+import os
 
-# 1. Page Configuration
+# --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="FABRIZIO AI 3.3.3", 
+    page_icon="⚽",
     layout="wide", 
     initial_sidebar_state="collapsed"
 )
 
-# 2. LLM Setup
-genai.configure(api_key="AIzaSyDWVxRdsnuBeVMGzdqkVRypVrcmX97nBWo")
-llm_model = genai.GenerativeModel('gemini-pro')
+# --- 2. SECURE LLM SETUP ---
+# Fetch API key securely from Streamlit secrets or environment variables
+api_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", "YOUR_API_KEY_HERE"))
+genai.configure(api_key=api_key)
+llm_model = genai.GenerativeModel("gemini-pro")
 
-# 3. Fabrizio Brand Styling 
+# --- 3. PREMIUM BRAND STYLING (GLASSMORPHISM & GLOW) ---
 st.markdown(
     """
     <style>
-    .stApp { background-color: #0B0B0B; color: #E0E0E0; font-family: 'Inter', sans-serif; }
+    /* Main Background */
+    .stApp { 
+        background: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #050505 100%);
+        color: #E0E0E0; 
+        font-family: 'Inter', sans-serif; 
+    }
     
-    /* Branding Colors: Fabrizio = Gold, AI = Red */
-    .brand-fab { color: #FFD700; font-weight: 900; letter-spacing: 2px; }
-    .brand-ai { color: #FF3131; font-weight: 900; }
+    /* Typography & Brand Colors */
+    .brand-fab { color: #FFD700; font-weight: 900; letter-spacing: 3px; text-shadow: 0px 0px 15px rgba(255, 215, 0, 0.4); }
+    .brand-ai { color: #FF3131; font-weight: 900; text-shadow: 0px 0px 15px rgba(255, 49, 49, 0.4); }
+    .section-title { font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px; }
     
+    /* Glassmorphism Cards */
     [data-testid="stVerticalBlock"] > div:has(div.element-container) {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 215, 0, 0.2);
-        border-radius: 15px;
+        background: linear-gradient(145deg, rgba(25, 25, 25, 0.6) 0%, rgba(10, 10, 10, 0.8) 100%);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 215, 0, 0.15);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        border-radius: 20px;
         padding: 25px;
     }
     
+    /* Custom Metric Cards */
+    .metric-box {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    .metric-value { font-size: 2.5rem; font-weight: 900; margin: 10px 0; }
+    
+    /* Buttons */
     .stButton>button {
-        background-color: #FFD700 !important;
+        background: linear-gradient(90deg, #FFD700 0%, #FDB931 100%) !important;
         color: #0B0B0B !important; 
         border: none !important;
-        border-radius: 5px;
+        border-radius: 8px;
         font-weight: 900;
+        letter-spacing: 1px;
         width: 100%;
+        transition: all 0.3s ease;
+        box-shadow: 0px 4px 15px rgba(255, 215, 0, 0.3);
+    }
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0px 6px 20px rgba(255, 215, 0, 0.5);
     }
     
+    /* Sliders */
     div[data-baseweb="slider"] > div > div { background-color: #FFD700 !important; }
     
     header {visibility: hidden;}
@@ -53,6 +86,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# --- 4. CORE FUNCTIONS ---
 def get_smart_analysis(name, val, prob, status):
     prompt = f"""
     Act as Fabrizio Romano, the football transfer expert. 
@@ -68,123 +102,184 @@ def get_smart_analysis(name, val, prob, status):
     try:
         response = llm_model.generate_content(prompt)
         return response.text
-    except:
-        return "📡 Connection to Scouting Network established. Analysis pending..."
+    except Exception as e:
+        return f"📡 Connection to Scouting Network established. Analysis pending... (Error: {str(e)})"
+
 
 @st.cache_resource
 def load_assets():
     try:
         custom_objects = {"mse": tf.keras.losses.MeanSquaredError()}
-        model = tf.keras.models.load_model("champion_model.h5", custom_objects=custom_objects)
+        model = tf.keras.models.load_model(
+            "champion_model.h5", custom_objects=custom_objects
+        )
         scaler = joblib.load("scaler.pkl")
         data = pd.read_csv("player_stats.csv", encoding="latin1")
         data.columns = data.columns.str.strip().str.lower()
         data = data.fillna(0)
         return model, scaler, data
-    except:
-        st.error("Missing model files.")
+    except Exception as e:
+        st.error(f"Missing model files: {str(e)}")
         return None, None, None
 
 model, scaler, df = load_assets()
 
-# --- TOP NAVIGATION ---
-st.markdown("<h1 style='text-align: center; margin-bottom: 0;'><span class='brand-fab'>FABRIZIO</span> <span class='brand-ai'>AI</span></h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #666; font-size: 0.8em;'>INTELLIGENT NEURAL SCOUTING v3.3.3</p>", unsafe_allow_html=True)
+# --- 5. TOP NAVIGATION & HEADER ---
+st.markdown(
+    "<h1 style='text-align: center; margin-bottom: -10px; font-size: 3.5rem;'><span class='brand-fab'>FABRIZIO</span> <span class='brand-ai'>AI</span></h1>",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    "<p style='text-align: center; color: #888; font-size: 0.9em; letter-spacing: 2px; margin-bottom: 40px;'>INTELLIGENT NEURAL SCOUTING v3.3.3</p>",
+    unsafe_allow_html=True,
+)
 
+# Search Bar
 _, search_col, _ = st.columns([1, 2, 1])
 with search_col:
-    selected_player = st.selectbox("SEARCH MARKET", ["Search Player..."] + list(df["player"].unique()), key="fab_search")
+    player_list = ["Search Player..."] + list(df["player"].unique()) if df is not None else ["Search Player..."]
+    selected_player = st.selectbox(
+        "MARKET DATABASE",
+        player_list,
+        key="fab_search",
+        label_visibility="collapsed"
+    )
 
-if selected_player != "Search Player...":
+# Logic initialization
+if selected_player != "Search Player..." and df is not None:
     p_data = df[df["player"] == selected_player].iloc[0]
     display_name = selected_player.upper()
     init_vals = [
-        (p_data["sprint_speed"] + p_data["acceleration"]) / 2, 
-        (p_data["finishing"] + p_data["shot_power"]) / 2, 
-        (p_data["short_pass"] + p_data["vision"]) / 2, 
-        (p_data["dribbling"] + p_data["ball_control"]) / 2, 
-        (p_data["stand_tackle"] + p_data["interceptions"]) / 2, 
-        (p_data["strength"] + p_data["stamina"]) / 2
+        (p_data["sprint_speed"] + p_data["acceleration"]) / 2,
+        (p_data["finishing"] + p_data["shot_power"]) / 2,
+        (p_data["short_pass"] + p_data["vision"]) / 2,
+        (p_data["dribbling"] + p_data["ball_control"]) / 2,
+        (p_data["stand_tackle"] + p_data["interceptions"]) / 2,
+        (p_data["strength"] + p_data["stamina"]) / 2,
     ]
 else:
-    display_name = "MOSES EFFEYOTAH"
-    init_vals = [45.0] * 6
+    display_name = "TARGET ACQUISITION"
+    init_vals = [50.0] * 6
 
+st.divider()
+
+# --- 6. MAIN DASHBOARD LAYOUT ---
 col_dna, col_report = st.columns([1, 1.2], gap="large")
 
 with col_dna:
-    st.markdown("### 🧬 <span style='color:#FFD700;'>PLAYER STATS</span>", unsafe_allow_html=True)
-    s1 = st.slider("PACE", 0, 100, int(init_vals[0]))
-    s2 = st.slider("SHOOTING", 0, 100, int(init_vals[1]))
-    s3 = st.slider("PASSING", 0, 100, int(init_vals[2]))
-    s4 = st.slider("DRIBBLING", 0, 100, int(init_vals[3]))
-    s5 = st.slider("DEFENDING", 0, 100, int(init_vals[4]))
-    s6 = st.slider("PHYSICALITY", 0, 100, int(init_vals[5]))
+    st.markdown("<div class='section-title'>🧬 PLAYER DNA OVERVIEW</div>", unsafe_allow_html=True)
+    
+    # Sliders
+    s1 = st.slider("⚡ PACE", 0, 100, int(init_vals[0]))
+    s2 = st.slider("🎯 SHOOTING", 0, 100, int(init_vals[1]))
+    s3 = st.slider("👁️ PASSING", 0, 100, int(init_vals[2]))
+    s4 = st.slider("✨ DRIBBLING", 0, 100, int(init_vals[3]))
+    s5 = st.slider("🛡️ DEFENDING", 0, 100, int(init_vals[4]))
+    s6 = st.slider("💪 PHYSICALITY", 0, 100, int(init_vals[5]))
 
-    fig = go.Figure(go.Scatterpolar(
-        r=[s1, s2, s3, s4, s5, s6],
-        theta=["PACE", "SHOOTING", "PASSING", "DRIBBLING", "DEFENDING", "PHYSICALITY"],
-        fill="toself", fillcolor="rgba(255, 215, 0, 0.1)", line=dict(color="#FFD700", width=3)
-    ))
-    fig.update_layout(polar=dict(bgcolor="rgba(0,0,0,0)", radialaxis=dict(visible=True, range=[0, 100], color="#555")), showlegend=False, paper_bgcolor="rgba(0,0,0,0)")
-    st.plotly_chart(fig, width='stretch')
+    # Upgraded Radar Chart
+    fig = go.Figure(
+        go.Scatterpolar(
+            r=[s1, s2, s3, s4, s5, s6],
+            theta=["PACE", "SHOOTING", "PASSING", "DRIBBLING", "DEFENDING", "PHYSICALITY"],
+            fill="toself",
+            fillcolor="rgba(255, 215, 0, 0.15)",
+            line=dict(color="#FFD700", width=4),
+            marker=dict(color="#FF3131", size=8)
+        )
+    )
+    fig.update_layout(
+        polar=dict(
+            bgcolor="rgba(0,0,0,0)",
+            radialaxis=dict(visible=True, range=[0, 100], color="#444", gridcolor="rgba(255,255,255,0.1)"),
+            angularaxis=dict(color="#FFF", gridcolor="rgba(255,255,255,0.1)")
+        ),
+        showlegend=False,
+        paper_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=30, r=30, t=30, b=30),
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
 with col_report:
-    st.markdown("### 📡 <span style='color:#FF3131;'>NEURAL VERDICT</span>", unsafe_allow_html=True)
-    threshold = st.slider("SCOUT SENSITIVITY", 0.0, 1.0, 0.85)
+    st.markdown("<div class='section-title'>📡 SCOUTING VERDICT</div>", unsafe_allow_html=True)
+    
+    threshold = st.slider("SCOUT STRICTNESS THRESHOLD", 0.0, 1.0, 0.85, help="Higher values require higher AI confidence to flag a player as ELITE.")
 
     if st.button("📢 ANALYZE: HERE WE GO!"):
-        if selected_player != "Search Player...":
-            full_row = df[df["player"] == selected_player].iloc[0].copy()
+        if df is not None and model is not None and scaler is not None:
+            if selected_player != "Search Player...":
+                full_row = df[df["player"] == selected_player].iloc[0].copy()
+            else:
+                full_row = df.quantile(0.25, numeric_only=True).copy()
+                full_row["age"] = 18
+
+            # Inject Slider Stats
+            slider_map = [s1, s2, s3, s4, s5, s6]
+            attr_groups = [
+                ["acceleration", "sprint_speed"],
+                ["finishing", "shot_power"],
+                ["short_pass", "vision"],
+                ["dribbling", "ball_control"],
+                ["stand_tackle", "interceptions"],
+                ["strength", "stamina"],
+            ]
+
+            for idx, attr_list in enumerate(attr_groups):
+                for col_name in attr_list:
+                    if col_name in full_row:
+                        full_row[col_name] = slider_map[idx]
+
+            expected_features = scaler.feature_names_in_
+            for col in expected_features:
+                if col not in full_row:
+                    full_row[col] = 0
+
+            feat = full_row[expected_features]
+            input_raw = pd.to_numeric(feat, errors="coerce").fillna(0).values.reshape(1, -1)
+
+            # Predict
+            input_scaled = scaler.transform(input_raw)
+            val_pred, cls_pred = model.predict(input_scaled)
+            prob = float(cls_pred[0][0])
+
+            status = "ELITE TARGET 🌟" if prob > threshold else "PROSPECT ASSET ⚽"
+            status_color = "#00FF87" if prob > threshold else "#FFD700"
+            final_val = val_pred[0][0] if s1 > 20 else val_pred[0][0] * 0.1
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # Rich Metrics Layout
+            m1, m2 = st.columns(2)
+            with m1:
+                st.markdown(f"""
+                <div class="metric-box">
+                    <div style="color: #888; font-size: 0.9rem; letter-spacing: 1px;">MARKET VALUATION</div>
+                    <div class="metric-value" style="color: #FFF;">${final_val:.2f}M</div>
+                </div>
+                """, unsafe_allow_html=True)
+            with m2:
+                st.markdown(f"""
+                <div class="metric-box">
+                    <div style="color: #888; font-size: 0.9rem; letter-spacing: 1px;">AI CLASSIFICATION</div>
+                    <div class="metric-value" style="color: {status_color}; font-size: 1.8rem;">{status}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            st.progress(prob, text=f"Neural Confidence Match: {prob*100:.1f}%")
+
+            with st.expander("🤖 ROMANO INSIGHTS", expanded=True):
+                with st.spinner("Connecting to Fabrizio's Network..."):
+                    analysis = get_smart_analysis(display_name, final_val, prob, status)
+                    st.info(analysis)
         else:
-            full_row = df.quantile(0.25, numeric_only=True).copy()
-            full_row["age"] = 18
+            st.error("System offline. Please ensure model files are loaded correctly.")
 
-        # Inject Slider Stats
-        slider_map = [s1, s2, s3, s4, s5, s6]
-        attr_groups = [
-            ["acceleration", "sprint_speed"], ["finishing", "shot_power"], 
-            ["short_pass", "vision"], ["dribbling", "ball_control"], 
-            ["stand_tackle", "interceptions"], ["strength", "stamina"]
-        ]
-        
-        for idx, attr_list in enumerate(attr_groups):
-            for col_name in attr_list:
-                if col_name in full_row: 
-                    full_row[col_name] = slider_map[idx]
-
-        # Auto-Align features
-        expected_features = scaler.feature_names_in_
-        for col in expected_features:
-            if col not in full_row: 
-                full_row[col] = 0
-        
-        feat = full_row[expected_features]
-        input_raw = pd.to_numeric(feat, errors="coerce").fillna(0).values.reshape(1, -1)
-        
-        # Scale and Predict
-        input_scaled = scaler.transform(input_raw)
-        val_pred, cls_pred = model.predict(input_scaled)
-        prob = float(cls_pred[0][0])
-
-        st.markdown("---")
-        status = "ELITE TARGET 🌟" if prob > threshold else "PROSPECT ASSET ⚽"
-        status_color = "#00FF87" if prob > threshold else "#FFD700"
-        final_val = val_pred[0][0] if s1 > 20 else val_pred[0][0] * 0.1
-
-        st.markdown(f"<h3 style='color:{status_color}; text-align: center;'>{status}</h3>", unsafe_allow_html=True)
-        st.metric("PREDICTED VALUE", f"${final_val:.2f}M")
-        
-        with st.expander("🤖 SMART SCOUT ANALYSIS", expanded=True):
-            with st.spinner("Consulting LLM..."):
-                analysis = get_smart_analysis(display_name, final_val, prob, status)
-                st.write(analysis)
-
-        st.progress(prob)
-
-# --- FOOTER BAR ---
-st.markdown("<br><hr style='border: 1px solid #333;'>", unsafe_allow_html=True)
-f1, f2, f3 = st.columns(3)
-with f1: st.button("📑 DOSSIER")
-with f2: st.button("🔄 COMPARE")
-with f3: st.button("🗞️ LIVE FEED")
+# --- 7. FOOTER ACTION BAR ---
+st.markdown("<br><hr style='border: 1px solid rgba(255,255,255,0.1); margin-top: 50px;'>", unsafe_allow_html=True)
+f1, f2, f3, f4, f5 = st.columns([1, 2, 2, 2, 1])
+with f2:
+    st.button("📑 SAVE DOSSIER")
+with f3:
+    st.button("🔄 COMPARE TARGETS")
+with f4:
+    st.button("🗞️ LIVE SCOUT FEED")
