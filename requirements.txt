@@ -4,5 +4,5 @@ numpy
 tensorflow
 joblib
 plotly
-google-generativeai
+groq
 scikit-learn==1.8.0
