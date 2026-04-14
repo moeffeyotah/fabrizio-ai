@@ -4,8 +4,8 @@ import numpy as np
 import tensorflow as tf
 import joblib
 import plotly.graph_objects as go
-import google.generativeai as genai
 import os
+from groq import Groq # Swapped from Google Gemini to Groq
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
@@ -15,11 +15,13 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. SECURE LLM SETUP ---
-# Fetch API key securely from Streamlit secrets or environment variables
-api_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", "YOUR_API_KEY_HERE"))
-genai.configure(api_key=api_key)
-llm_model = genai.GenerativeModel("gemini-pro")
+# --- 2. SECURE LLM SETUP (GROQ LPU ENGINE) ---
+# Hardcoded as a fallback for immediate use, but try to use st.secrets long-term!
+groq_key = st.secrets.get(
+    "GROQ_API_KEY", 
+    os.getenv("GROQ_API_KEY", "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")
+)
+client = Groq(api_key=groq_key)
 
 # --- 3. PREMIUM BRAND STYLING (GLASSMORPHISM & GLOW) ---
 st.markdown(
@@ -112,7 +114,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- 4. CORE FUNCTIONS ---
+# --- 4. CORE FUNCTIONS (NOW POWERED BY GROQ) ---
 def get_smart_analysis(name, val, prob, status):
     prompt = f"""
     Act as Fabrizio Romano, the football transfer expert. 
@@ -126,10 +128,16 @@ def get_smart_analysis(name, val, prob, status):
     Be excited if it's Elite, and professional if it's a Prospect.
     """
     try:
-        response = llm_model.generate_content(prompt)
-        return response.text
+        # Utilizing Groq's high-speed Llama 3.3 70B engine
+        chat_completion = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            temperature=0.7, 
+            max_tokens=150,  
+        )
+        return chat_completion.choices[0].message.content
     except Exception as e:
-        return f"📡 Connection to Scouting Network established. Analysis pending... (Error: {str(e)})"
+        return f"📡 Connection to Groq Network failed. Analysis pending... (Error: {str(e)})"
 
 
 @st.cache_resource
@@ -198,7 +206,7 @@ with doc_col1:
         * **Market Valuation:** A predictive monetary value based on historical stats.
         * **AI Classification:** A binary threshold rating classifying the player as an *Elite Target* or a *Prospect Asset*.
         
-        The system is augmented by a **Google Gemini LLM** acting as a "Fabrizio Romano" agent to synthesize the data into actionable transfer intelligence.
+        The system is augmented by a **Groq LPU LLM** acting as a "Fabrizio Romano" agent to synthesize the data into actionable transfer intelligence.
         """)
 with doc_col2:
     with st.expander("🛠️ Scouting Guide"):
