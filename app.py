@@ -59,6 +59,20 @@ st.markdown(
     }
     .metric-value { font-size: 2.5rem; font-weight: 900; margin: 10px 0; }
     
+    /* Expander (Drop Down) Hover Fix */
+    [data-testid="stExpander"] details summary {
+        background-color: rgba(20, 20, 20, 0.6) !important;
+        border-radius: 8px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    [data-testid="stExpander"] details summary:hover {
+        background-color: rgba(45, 45, 45, 0.9) !important; /* Subtle dark gray, no white flash */
+        color: #FFD700 !important; /* Text turns gold on hover */
+    }
+    [data-testid="stExpander"] details summary svg {
+        fill: #FFD700 !important; /* Keep the drop-down arrow gold */
+    }
+    
     /* Buttons */
     .stButton>button {
         background: linear-gradient(90deg, #FFD700 0%, #FDB931 100%) !important;
