@@ -35,7 +35,7 @@ st.markdown(
     /* Typography & Brand Colors */
     .brand-fab { color: #FFD700; font-weight: 900; letter-spacing: 3px; text-shadow: 0px 0px 15px rgba(255, 215, 0, 0.4); }
     .brand-ai { color: #FF3131; font-weight: 900; text-shadow: 0px 0px 15px rgba(255, 49, 49, 0.4); }
-    .section-title { font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px; }
+    .section-title { font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px; color: #FFD700; }
     
     /* Glassmorphism Cards */
     [data-testid="stVerticalBlock"] > div:has(div.element-container) {
@@ -78,6 +78,18 @@ st.markdown(
     
     /* Sliders */
     div[data-baseweb="slider"] > div > div { background-color: #FFD700 !important; }
+    
+    /* Signature Footer */
+    .signature-footer {
+        text-align: center;
+        color: #666;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .signature-footer strong { color: #FFD700; }
     
     header {visibility: hidden;}
     footer {visibility: hidden;}
@@ -130,7 +142,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.markdown(
-    "<p style='text-align: center; color: #888; font-size: 0.9em; letter-spacing: 2px; margin-bottom: 40px;'>INTELLIGENT NEURAL SCOUTING v3.3.3</p>",
+    "<p style='text-align: center; color: #888; font-size: 0.9em; letter-spacing: 2px; margin-bottom: 20px;'>INTELLIGENT NEURAL SCOUTING v3.3.3</p>",
     unsafe_allow_html=True,
 )
 
@@ -160,6 +172,28 @@ if selected_player != "Search Player..." and df is not None:
 else:
     display_name = "TARGET ACQUISITION"
     init_vals = [50.0] * 6
+
+# --- APP DOCUMENTATION ---
+doc_col1, doc_col2 = st.columns(2)
+with doc_col1:
+    with st.expander("📖 About FABRIZIO AI"):
+        st.write("""
+        **FABRIZIO AI** is an advanced neural scouting platform designed to evaluate football talent using Deep Learning. 
+        
+        It utilizes a **TensorFlow Neural Network** to analyze a player's physical and technical DNA, outputting two distinct metrics:
+        * **Market Valuation:** A predictive monetary value based on historical stats.
+        * **AI Classification:** A binary threshold rating classifying the player as an *Elite Target* or a *Prospect Asset*.
+        
+        The system is augmented by a **Google Gemini LLM** acting as a "Fabrizio Romano" agent to synthesize the data into actionable transfer intelligence.
+        """)
+with doc_col2:
+    with st.expander("🛠️ Scouting Guide"):
+        st.write("""
+        1. **Search the Market:** Select a known player from the central dropdown to instantly load their core stats.
+        2. **Custom DNA Generation:** Alternatively, ignore the search and manually adjust the DNA sliders to build your ideal transfer target.
+        3. **Set Threshold:** Adjust the *Scout Strictness* slider to determine how aggressively the AI filters for Elite players.
+        4. **Execute:** Click **'ANALYZE: HERE WE GO!'** to feed the data through the neural network and generate the transfer dossier.
+        """)
 
 st.divider()
 
@@ -274,8 +308,8 @@ with col_report:
         else:
             st.error("System offline. Please ensure model files are loaded correctly.")
 
-# --- 7. FOOTER ACTION BAR ---
-st.markdown("<br><hr style='border: 1px solid rgba(255,255,255,0.1); margin-top: 50px;'>", unsafe_allow_html=True)
+# --- 7. FOOTER & SIGNATURE ---
+st.markdown("<br>", unsafe_allow_html=True)
 f1, f2, f3, f4, f5 = st.columns([1, 2, 2, 2, 1])
 with f2:
     st.button("📑 SAVE DOSSIER")
@@ -283,3 +317,14 @@ with f3:
     st.button("🔄 COMPARE TARGETS")
 with f4:
     st.button("🗞️ LIVE SCOUT FEED")
+
+# The Signature
+st.markdown(
+    """
+    <div class='signature-footer'>
+        Designed and Engineered by <strong>Moses Mudiaga Effeyotah</strong><br>
+        School of Information Technology | Fanshawe College
+    </div>
+    """, 
+    unsafe_allow_html=True
+)
